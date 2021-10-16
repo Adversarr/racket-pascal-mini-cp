@@ -1,0 +1,111 @@
+\documentclass[lang=cn]{elegantpaper}
+\usepackage{listings}
+\usepackage{hyperref}
+\title{编译原理 -- 实验 1 - 词法分析}
+\author{61519322 杨哲睿}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\tableofcontents
+
+
+% 提交清单：
+% - Mini语言的词法规则描述（正规式或正规文法）
+% - 正规式或正规文法->NFA->DFA->minimized DFA的手工过程（拍照整理为word或pdf文档）
+% - 词法分析程序
+% - 测试用例文件和测试结果文件
+% - 实验报告
+
+% 选择语言：pascal
+% 源语言： rust-lang
+
+\section{引言}
+
+\subsection{实验要求}
+
+\begin{quote}
+    选择一个你熟悉的程序设计语言，找到它的规范（referrence or standard）。在规范中找到其词法的BNF或正规式描述。
+\end{quote}
+
+\begin{remark}
+    选择的程序设计语言为：\lstinline|pascal|（源语言），具体规范参考为 \hyperref{https://github.com/bonzini/flex/blob/master/examples/manual/pascal.lex}{}{}{Github-pascal词法的lex描述}。
+\end{remark}
+
+\begin{quotation}
+    选择该语言的一个子集（能够构成一个mini的语言，该语言至少能够进行函数调用、控制流语句（分支或循环）、简单的运算和赋值操作。）给出该mini语言的词法的正规文法或正规式。
+    
+\end{quotation}
+
+在这里，选择的mini语言关键字为：
+
+\begin{lstlisting}[language=pascal]
+and
+begin
+div
+do
+else
+end
+for
+function
+if
+in
+nil
+not
+of
+procedure
+program
+repeat
+set
+then
+to
+until
+var
+while
+\end{lstlisting}
+
+符号如下：
+
+\begin{lstlisting}[language=pascal]
+<= >= < > <> =
+:=
+..
++ - * /
+[ ] ( )
+\end{lstlisting}
+
+其他需要的基本词法单元如下：
+\begin{enumerate}
+    \item 数
+    \item 标识符
+    \item 字符串
+\end{enumerate}
+
+下面给出具体的词法规则描述。
+
+\section{词法规则描述}
+
+% 一部分用正规式、部分用正规文法
+
+\section{Minimized-DFA 简化过程}
+
+\section{词法分析程序}
+
+\subsection{简述}
+
+\subsection{测试用例和测试结果}
+
+\section{总结}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%% Biblo %%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% \begin{thebibliography}{99}  
+
+    
+% \end{thebibliography}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\end{document}
