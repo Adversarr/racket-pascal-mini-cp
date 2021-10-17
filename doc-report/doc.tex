@@ -65,31 +65,32 @@ until
 var
 while
 \end{lstlisting}
+与标识符一同识别。
 
-符号如下：
+relop 如下：
 
 \begin{lstlisting}[language=pascal]
 <= >= < > <> =
 :=
 ..
 + - * /
+\end{lstlisting}
+
+界符 sep 如下：
+\begin{lstlisting}[language=pascal]
 [ ] ( )
+, ; .
 \end{lstlisting}
 
 其他需要的基本词法单元如下：
 \begin{enumerate}
     \item 数
-    \item 标识符
     \item 字符串
 \end{enumerate}
 
 下面给出具体的词法规则描述。
 
-\section{词法规则描述}
-
-% 一部分用正规式、部分用正规文法
-
-\section{Minimized-DFA 简化过程}
+\section{词法规则描述、Minimized-DFA 简化过程}
 
 \section{词法分析程序}
 
