@@ -6,6 +6,7 @@
 (provide Whitespace!)
 (provide Relop!)
 (provide ArrayIndex!)
+(provide String!)
 
 ; DFA -- ArrayIndexSM
 (define ArrayIndexSM
@@ -100,6 +101,29 @@
            )
     s0))
 
+; DFA -- string
+(define StringSM
+  (let ([q? (lambda (ch) (char=? ch #\'))])
+    (letrec ([s0 (lambda (ch)(cond
+                               [(q? ch) s1]
+                               [else #f]))]
+             [s1 (lambda (ch) (cond
+                                [(q? ch) s1]
+                                [(char=? #\nul ch) #f]
+                                [else s3]))]
+             [s2 (lambda (ch) (cond
+                                [(q? ch) s3]
+                                [else #f]))]
+             [s3 (lambda (ch) (cond
+                                [(q? ch) s4]
+                                [(char=? #\nul ch) #f]
+                                [else s3]))]
+             [s4 (lambda (ch) (cond
+                                [(q? ch)s3]
+                                [else #t]))])
+      s0)))
+
+
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ; DFA is -- (K, Σ, f, S, Z)
 ; K -- state
@@ -147,3 +171,5 @@
   (iter-until-fail RelopSM buffer))
 (define (ArrayIndex! buffer)
   (iter-until-fail ArrayIndexSM buffer))
+(define (String! buffer)
+  (iter-until-fail StringSM buffer))

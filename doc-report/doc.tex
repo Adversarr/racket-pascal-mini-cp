@@ -92,21 +92,90 @@ relop 如下：
 
 \section{词法规则描述、Minimized-DFA 简化过程}
 
+如图所示：
+
+
 \section{词法分析程序}
 
+
 \subsection{简述}
+
+正如DFA的定义：描述DFA只需要五元组 $S = (K, \Sigma, f, S, Z)$。那么描述DFA中的状态
+只需要状态转换函数：
+$$
+change_{S}(\mathrm{ch}) = f( S, \mathrm{ch})
+$$
+这适合于将函数作为第一公民的{\textbf{函数式编程}}来实现。同时，对于$change_S(\mathrm{ch})$
+做出如下的约定：
+
+\noindent $change_{S} (\mathrm {ch}) = $
+\begin{enumerate}
+    \item 若DFA中存在 $S' = f (S, \mathrm{ch})$ 那么输出为对应状态（的状态转换函数）
+          即输出为$change{S'}$
+    \item 若DFA中不存在这样的转换，那么若
+        \subitem $S \in Z$ 输出 \lstinline|true|；
+        \subitem $S \notin Z$ 输出 \lstinline|false|。
+\end{enumerate}
+
+例如：
+
+\begin{example} 字符串的识别：
+
+    正如上文所提到的，将手工简化好的DFA转换为代码，即为：
+
+    \begin{lstlisting}[language=lisp,caption=Racket-lang 实现-用于匹配字符串的DFA定义]
+; DFA -- string
+(define StringSM
+(let ([q? (lambda (ch) (char=? ch #\'))])
+    (letrec ([s0 (lambda (ch) (cond
+                                [(q? ch) s1]
+                                [else #f]))]
+             [s1 (lambda (ch) (cond
+                                [(q? ch) s1]
+                                [(char=? #\nul ch) #f]
+                                [else s3]))]
+             [s2 (lambda (ch) (cond
+                                [(q? ch) s3]
+                                [else #f]))]
+             [s3 (lambda (ch) (cond
+                                [(q? ch) s4]
+                                [(char=? #\nul ch) #f]
+                                [else s3]))]
+             [s4 (lambda (ch) (cond
+                                [(q? ch)s3]
+                                [else #t]))])
+    s0)))
+    \end{lstlisting}
+
+    与此同时，为了运行该自动机，完成了\lstinline|iter-until-fail|函数，该函数的作用是
+    在给定的符号列上运行DFA，直到DFA无法识别当前符号时停止。
+
+    \begin{lstlisting}[language=lisp, caption=在给定的符号列上，运行该状态机]
+(define (iter-until-fail s l)
+  (let* ([ch (if (empty? l)
+                 #\null
+                 (first l))] ; getch --> ch
+         [t (s ch)])         ; transition {s --[ch]-> t}
+    (if (boolean? t)         ; stop?
+        (if t
+            (list)           ; '()  -> accept
+            (void))          ; void -> fail
+        (let ([result (iter-until-fail t (rest l))])
+          (if (void? result)
+              (void)         ; -> fail matching
+              (cons ch result))
+          ))))
+    \end{lstlisting}
+\end{example}
+
+\subsection{实现细节}
+
+\subsubsection{标识符-关键字的特殊处理}
+
+\subsubsection{数组大小约定的数字识别 -- 向前看}
 
 \subsection{测试用例和测试结果}
 
 \section{总结}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%% Biblo %%%%%%%%%%%%%%%%%%%%%%%%%%
-
-% \begin{thebibliography}{99}  
-
-    
-% \end{thebibliography}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \end{document}
