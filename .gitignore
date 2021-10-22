@@ -4,7 +4,7 @@
 *.aux
 *.fdb_*
 *.out
-*.pdf
+
 *.synctex.gz
 *.toc
 *.log
