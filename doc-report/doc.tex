@@ -1,6 +1,7 @@
 \documentclass[lang=cn]{elegantpaper}
 \usepackage{listings}
 \usepackage{hyperref}
+\usepackage{graphicx}
 \title{编译原理 -- 实验 1 - 词法分析}
 \author{61519322 杨哲睿}
 \date{\today}
@@ -93,6 +94,40 @@ relop 如下：
 \section{词法规则描述、Minimized-DFA 简化过程}
 
 如图所示：
+% TODO:  required
+\begin{figure}
+	\centering
+	\includegraphics[width=0.7\linewidth]{img/IMG_3153}
+	\caption{字符串}
+	\label{fig:img3153}
+\end{figure}
+\begin{figure}
+	\centering
+	\includegraphics[width=0.7\linewidth]{img/IMG_3154}
+	\caption{数字识别1}
+	\label{fig:img3154}
+\end{figure}
+
+\begin{figure}
+	\centering
+	\includegraphics[width=0.7\linewidth]{img/IMG_3155}
+	\caption{数字识别2}
+	\label{fig:img3155}
+\end{figure}
+
+\begin{figure}
+	\centering
+	\includegraphics[width=0.7\linewidth]{img/IMG_3156}
+	\caption{标识符/关键字识别}
+	\label{fig:img3156}
+\end{figure}
+
+\begin{figure}
+	\centering
+	\includegraphics[width=0.7\linewidth]{img/IMG_3157}
+	\caption{Relop识别}
+	\label{fig:img3157}
+\end{figure}
 
 
 \section{词法分析程序}
@@ -123,7 +158,7 @@ $$
 
     正如上文所提到的，将手工简化好的DFA转换为代码，即为：
 
-    \begin{lstlisting}[language=lisp,caption=Racket-lang 实现-用于匹配字符串的DFA定义]
+\begin{lstlisting}[language=lisp,caption=Racket-lang 实现-用于匹配字符串的DFA定义]
 ; DFA -- string
 (define StringSM
 (let ([q? (lambda (ch) (char=? ch #\'))])
@@ -145,12 +180,12 @@ $$
                                 [(q? ch)s3]
                                 [else #t]))])
     s0)))
-    \end{lstlisting}
+\end{lstlisting}
 
     与此同时，为了运行该自动机，完成了\lstinline|iter-until-fail|函数，该函数的作用是
     在给定的符号列上运行DFA，直到DFA无法识别当前符号时停止。
 
-    \begin{lstlisting}[language=lisp, caption=在给定的符号列上，运行该状态机]
+\begin{lstlisting}[language=lisp, caption=在给定的符号列上，运行该状态机]
 (define (iter-until-fail s l)
   (let* ([ch (if (empty? l)
                  #\null
@@ -190,7 +225,6 @@ var a: array [1..4] of int;
 \subsection{词法分析函数 \lstinline|get-token|}
 
 \begin{lstlisting}[language=lisp]
-
 (define (get-token str)
   (let* ([buffer (string->list str)]
          [s (first buffer)]) ; s: the first char in buffer
@@ -245,14 +279,186 @@ var a: array [1..4] of int;
 
 \subsection{测试用例和测试结果}
 
-我们的测试用例如下：
+\subsubsection{测试1 -- 数字、字符串、标识符}
 
-\lstinputlisting[language=pascal]{../1.pas}
+测试用例如下：
+
+\lstinputlisting[language=pascal, caption={test1.pas}]{../lex/test1.pas}
 
 测试结果如下：
 
-% TODO.
+\begin{lstlisting}
+Content of test1.pas is:
+a := b + 1;
+c = '123';
+i0123_abc
+'3124''123'
+1.3245
+1e3
+1e-3
+1.0e3
+13
+-13
+
+################## RESULT OF LEXER ##################
+
+#(struct:token a #<token-kind:token-identifier> a)
+#(struct:token <whitespace> #<token-kind:token-whitespace> #<void>)
+#(struct:token := #<token-kind:token-relop> assign)
+#(struct:token <whitespace> #<token-kind:token-whitespace> #<void>)
+#(struct:token b #<token-kind:token-identifier> b)
+#(struct:token <whitespace> #<token-kind:token-whitespace> #<void>)
+#(struct:token + #<token-kind:token-relop> plus)
+#(struct:token <whitespace> #<token-kind:token-whitespace> #<void>)
+#(struct:token 1 #<token-kind:token-number> #<void>)
+#(struct:token ; #<token-kind:token-sep> semicolon)
+#(struct:token <whitespace> #<token-kind:token-whitespace> #<void>)
+#(struct:token c #<token-kind:token-identifier> c)
+#(struct:token <whitespace> #<token-kind:token-whitespace> #<void>)
+#(struct:token = #<token-kind:token-relop> eq)
+#(struct:token <whitespace> #<token-kind:token-whitespace> #<void>)
+#(struct:token '123' #<token-kind:token-string> '123')
+#(struct:token ; #<token-kind:token-sep> semicolon)
+#(struct:token <whitespace> #<token-kind:token-whitespace> #<void>)
+#(struct:token i0123_abc #<token-kind:token-identifier> i0123_abc)
+#(struct:token <whitespace> #<token-kind:token-whitespace> #<void>)
+#(struct:token '3124''123' #<token-kind:token-string> '3124''123')
+#(struct:token <whitespace> #<token-kind:token-whitespace> #<void>)
+#(struct:token 1.3245 #<token-kind:token-number> #<void>)
+#(struct:token <whitespace> #<token-kind:token-whitespace> #<void>)
+#(struct:token 1e3 #<token-kind:token-number> #<void>)
+#(struct:token <whitespace> #<token-kind:token-whitespace> #<void>)
+#(struct:token 1e-3 #<token-kind:token-number> #<void>)
+#(struct:token <whitespace> #<token-kind:token-whitespace> #<void>)
+#(struct:token 1.0e3 #<token-kind:token-number> #<void>)
+#(struct:token <whitespace> #<token-kind:token-whitespace> #<void>)
+#(struct:token 13 #<token-kind:token-number> #<void>)
+#(struct:token <whitespace> #<token-kind:token-whitespace> #<void>)
+#(struct:token - #<token-kind:token-relop> minus)
+#(struct:token 13 #<token-kind:token-number> #<void>)
+#(struct:token <whitespace> #<token-kind:token-whitespace> #<void>)
+\end{lstlisting}
+
+可以看到，我的词法分析程序对于空白字符和各个标识符、数字、赋值\lstinline|:=|
+和判断\lstinline|=|都进行了正确的判断。（\lstinline|assign| 和 
+\lstinline|eq|）
+
+\subsubsection{测试2 -- \lstinline|relop|的识别}
+
+第二个测试主要测试对于符号的识别：
+
+\lstinputlisting[language=pascal, caption={test2.pas}]{../lex/test2.pas}
+
+测试结果如下：
+
+\begin{lstlisting}
+Content of test2.pas is:
+> >= < <= = <> 
+:= ..
++ - * /
+[ ] ( )
+, ; .
+################## RESULT OF LEXER ##################
+
+#(struct:token > #<token-kind:token-relop> gt)
+#(struct:token <whitespace> #<token-kind:token-whitespace> #<void>)
+#(struct:token > #<token-kind:token-relop> gt)
+#(struct:token = #<token-kind:token-relop> eq)
+#(struct:token <whitespace> #<token-kind:token-whitespace> #<void>)
+#(struct:token < #<token-kind:token-relop> lt)
+#(struct:token <whitespace> #<token-kind:token-whitespace> #<void>)
+#(struct:token <= #<token-kind:token-relop> leq)
+#(struct:token <whitespace> #<token-kind:token-whitespace> #<void>)
+#(struct:token = #<token-kind:token-relop> eq)
+#(struct:token <whitespace> #<token-kind:token-whitespace> #<void>)
+#(struct:token <> #<token-kind:token-relop> neq)
+#(struct:token <whitespace> #<token-kind:token-whitespace> #<void>)
+#(struct:token := #<token-kind:token-relop> assign)
+#(struct:token <whitespace> #<token-kind:token-whitespace> #<void>)
+#(struct:token .. #<token-kind:token-relop> double-dot)
+#(struct:token <whitespace> #<token-kind:token-whitespace> #<void>)
+#(struct:token + #<token-kind:token-relop> plus)
+#(struct:token <whitespace> #<token-kind:token-whitespace> #<void>)
+#(struct:token - #<token-kind:token-relop> minus)
+#(struct:token <whitespace> #<token-kind:token-whitespace> #<void>)
+#(struct:token * #<token-kind:token-relop> multi)
+#(struct:token <whitespace> #<token-kind:token-whitespace> #<void>)
+#(struct:token / #<token-kind:token-relop> divide)
+#(struct:token <whitespace> #<token-kind:token-whitespace> #<void>)
+#(struct:token [ #<token-kind:token-sep> square-lbracket)
+#(struct:token <whitespace> #<token-kind:token-whitespace> #<void>)
+#(struct:token ] #<token-kind:token-sep> square-rbracket)
+#(struct:token <whitespace> #<token-kind:token-whitespace> #<void>)
+#(struct:token ( #<token-kind:token-sep> lbracket)
+#(struct:token <whitespace> #<token-kind:token-whitespace> #<void>)
+#(struct:token ) #<token-kind:token-sep> rbracket)
+#(struct:token <whitespace> #<token-kind:token-whitespace> #<void>)
+#(struct:token , #<token-kind:token-sep> comma)
+#(struct:token <whitespace> #<token-kind:token-whitespace> #<void>)
+#(struct:token ; #<token-kind:token-sep> semicolon)
+#(struct:token <whitespace> #<token-kind:token-whitespace> #<void>)
+#(struct:token . #<token-kind:token-relop> dot)
+\end{lstlisting}
+
+可见对于\lstinline|relop|和界符、运算符的词法分析的正确性。
+
+\subsubsection{测试3 -- 数组大小约定识别}
+
+对于前文提到的数组大小约定，我们用这个特殊的例子来证明我的词法分析程序的正确性：
+
+\lstinputlisting[language=pascal, caption={test3.pas}]{../lex/test3.pas}
+
+可以从下面的输出看到，词法分析程序对于 \lstinline|..| 都做出了正确的判断。
+
+\begin{lstlisting}
+Content of test3.pas is:
+var a: array[1..4, 3 .. 5] of integer;
+################## RESULT OF LEXER ##################
+
+#(struct:token var #<token-kind:token-keyword> var)
+#(struct:token <whitespace> #<token-kind:token-whitespace> #<void>)
+#(struct:token a #<token-kind:token-identifier> a)
+#(struct:token : #<token-kind:token-relop> #f)
+#(struct:token <whitespace> #<token-kind:token-whitespace> #<void>)
+#(struct:token array #<token-kind:token-identifier> array)
+#(struct:token [ #<token-kind:token-sep> square-lbracket)
+#(struct:token 1 #<token-kind:token-number> #<void>)
+#(struct:token .. #<token-kind:token-relop> double-dot)
+#(struct:token 4 #<token-kind:token-number> #<void>)
+#(struct:token , #<token-kind:token-sep> comma)
+#(struct:token <whitespace> #<token-kind:token-whitespace> #<void>)
+#(struct:token 3 #<token-kind:token-number> #<void>)
+#(struct:token <whitespace> #<token-kind:token-whitespace> #<void>)
+#(struct:token .. #<token-kind:token-relop> double-dot)
+#(struct:token <whitespace> #<token-kind:token-whitespace> #<void>)
+#(struct:token 5 #<token-kind:token-number> #<void>)
+#(struct:token ] #<token-kind:token-sep> square-rbracket)
+#(struct:token <whitespace> #<token-kind:token-whitespace> #<void>)
+#(struct:token of #<token-kind:token-keyword> of)
+#(struct:token <whitespace> #<token-kind:token-whitespace> #<void>)
+#(struct:token integer #<token-kind:token-identifier> integer)
+#(struct:token ; #<token-kind:token-sep> semicolon)
+\end{lstlisting}
 
 \section{总结}
+
+说说为啥用了Racket：
+我参考过很多往期的报告，他们大多都用了c作为实现语言，实现的也是对于c的词法分析，
+但我觉得词法分析程序中的自动机应用并不应该用c++的变量标识，然后依靠判断语句来对
+自动机来模拟运行。所以我第一个排除的实现语言就是面向对象、面向过程等范式来实现
+词法分析，首先也排除的也是如 C/C++、Java 这些强调面向过程、面向对象的语言。
+原本我想的是用python这些脚本语言，他们有函数式编程的基本的支持，但这依然不足以
+能够使得我脑子里面的{\heiti 状态即函数}的想法实现，因为它们依然不将函数作为
+第一公民中的''核心''。在最后我选择了一个相对陌生的语言 -- SICP中的开发工具 Racket。
+
+实际上在纸上实现完DFA状态转换图所有算法的核心就已经结束了。其他的工作都是一些
+细枝末节的处理、语法分析的控制程序和输入输出接口。这是一个很有意思的大作业，不得不说，
+因此我也将该代码发布到了
+\href{https://github.com/Jerryyang2001/racket-pascal-mini-cp}{我的个人github}
+上进行长期的存档。
+
+\begin{center}
+    Functional Programming -- 舒服了!
+\end{center}
 
 \end{document}

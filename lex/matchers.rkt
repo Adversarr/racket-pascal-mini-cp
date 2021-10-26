@@ -93,7 +93,7 @@
                               [else #t]))]
            [s4 (lambda (ch) (cond
                               [(char=? ch #\.) s1]
-                              [else #f]))]
+                              [else #t]))]
            [s5 (lambda (ch) (cond
                               [(char=? ch #\=) s1]
                               [else #t]))]

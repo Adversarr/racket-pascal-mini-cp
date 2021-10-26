@@ -51,6 +51,7 @@
     [(string=? s "=") "eq"]
     [(string=? s ":=") "assign"]
     [(string=? s "..") "double-dot"]
+    [(string=? s ".") "dot"]
     [(string=? s "+") "plus"]
     [(string=? s "-") "minus"]
     [(string=? s "*") "multi"]
