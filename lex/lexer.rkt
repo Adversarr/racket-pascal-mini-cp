@@ -1,6 +1,6 @@
 #lang racket
 
-
+(require racket/generator)
 (require "basic-utils.rkt")
 (require "matchers.rkt")
 (require "token.rkt")
@@ -79,6 +79,8 @@
       [(== token-whitespace) (struct-copy token i [content "<whitespace>"])]
       [else i])))
 
+(define (lexical-generator s)
+  (sequence->generator (lex-analyse s)))
 
 
 (provide (all-defined-out))
