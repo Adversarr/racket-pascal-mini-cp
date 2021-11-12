@@ -123,3 +123,4 @@
 
 
 (provide get-closure-function)
+(provide in-lritem-list?)

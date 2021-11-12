@@ -68,7 +68,7 @@
    (if
     (not (first sq))
     #f
-    (any-true? (rest sq)))))
+    (all-true? (rest sq)))))
 
 
 (define (display-production prod)

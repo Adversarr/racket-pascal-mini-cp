@@ -4,7 +4,7 @@
 (require "syntax-define.rkt")
 (require "closure.rkt")
 (require "goto.rkt")
-
+(require "build.rkt")
 (define STX-FAKE-S
   (syntax-item "S'" 0 (void)))
 
@@ -37,16 +37,25 @@
    (production STX-C (list stx-c STX-C))
    (production STX-C (list stx-d))))
 
+(define aug (LRItem STX-FAKE-S (list) (list STX-S)
+                    (syntax-item "EOF" 1024 (lambda (ch) (eq? ch #\nul)))))
 
 (define initial-lritem
-  (list (LRItem STX-FAKE-S (list) (list STX-S)
-                (syntax-item "EOF" 1024 (lambda (ch) (eq? ch #\nul))))))
+  (list aug))
 (define cl (get-closure-function prod))
-(define goto (get-goto cl))
+
 (define I0 (cl initial-lritem))
 
 (for-each display-lritem I0)
 (printf "The result of GOTO[I0, c] = \n")
-(define I1 (goto (goto I0 STX-C) stx-c))
+(define I1 (cl (goto (cl (goto I0 STX-C)) stx-c)))
 (for-each display-lritem I1)
 (printf "Diff = ~a" (closure-eq? I1 I1))
+(let rec ([result (build-lr1-closure-set prod aug)]
+          [depth 0])
+  (if (empty? result)
+      (printf "DONE...\n")
+      (begin
+        (printf "I[~a] is:\n" depth)
+        (for-each display-lritem (first result))
+        (rec (rest result) (add1 depth)))))
