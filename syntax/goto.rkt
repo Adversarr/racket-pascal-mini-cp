@@ -4,7 +4,7 @@
 (require "syntax-define.rkt")
 (require "closure.rkt")
 
-(define goto
+(define go
   (lambda (item-list a)
     (flatten
      (for/list ([item item-list])
@@ -17,6 +17,8 @@
                 (rest (LRItem-right-tail item))
                 (LRItem-look-ahead item))
                (list)))))))
+
+
 
 (define (closure-eq? a b)
   (all-true?

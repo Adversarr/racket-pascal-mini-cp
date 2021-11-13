@@ -80,7 +80,14 @@
       [else i])))
 
 (define (lexical-generator s)
-  (sequence->generator (lex-analyse s)))
+  (generator
+   ()
+   (let rec ([result (lex-analyse s)])
+     (if (empty? result)
+         (void)
+         (begin
+           (yield (first result))
+           (rec (rest result)))))))
 
 
 (provide (all-defined-out))

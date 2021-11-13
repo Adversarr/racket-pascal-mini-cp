@@ -32,7 +32,8 @@
 ; # PART 3. Syntax Tree Node -> (Production, List[content])
 
 (struct syntax-tree-node
-  (head-production children))
+  (head children) #:transparent)
+
 
 
 ; # PART 4: LRItem.
@@ -85,5 +86,29 @@
   (printf "· ")
   (for-each (lambda (stx) (printf "~a " (syntax-item-id stx))) (LRItem-right-tail item))
   (printf ", ~a)\n" (syntax-item-id (LRItem-look-ahead item))))
+
+(define (display-tree node)
+  (let rec ([node node])
+    (printf "(~a" (syntax-item-id (syntax-tree-node-head node)))
+    (if (list? (syntax-tree-node-children node))
+        (begin
+          (printf "-> {~a}[" (length (syntax-tree-node-children node)))
+          (for-each rec (syntax-tree-node-children node))
+          (printf "]"))
+        (void))
+    (printf ")")))
+
+(define (display-tree-mma node)
+  (printf "Tree[~a," (syntax-item-id (syntax-tree-node-head node)))
+  ; (display-tree node)
+  (if (list? (syntax-tree-node-children node))
+      (begin
+        (printf "{")
+        (for-each (lambda (x) (display-tree-mma x) (printf ", "))
+         (reverse (rest (reverse (syntax-tree-node-children node)))))
+        (display-tree-mma (last (syntax-tree-node-children node)))
+        (printf "}"))
+      (printf "\"~a\"" (syntax-item-id (syntax-tree-node-children node))))
+  (printf "]"))
 
 (provide (all-defined-out))
