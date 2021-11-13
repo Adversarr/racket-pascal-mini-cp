@@ -3,6 +3,7 @@
 (require rebellion/type/enum)
 
 (require rebellion/streaming/reducer)
+(require "../lex/token.rkt")
 
 
 ; # PART 1. Syntax Item
@@ -19,6 +20,9 @@
 
 (define (terminal? i)
   (not (non-terminal? i)))
+
+(struct matched-item
+        (stx content))
 
 ; # PART 2. Production.
 ; a list of 2-3 which can be described by:
@@ -95,7 +99,7 @@
           (printf "-> {~a}[" (length (syntax-tree-node-children node)))
           (for-each rec (syntax-tree-node-children node))
           (printf "]"))
-        (void))
+        (printf "~a" (matched-item-content (syntax-tree-node-children node))))
     (printf ")")))
 
 (define (display-tree-mma node)
@@ -104,11 +108,13 @@
   (if (list? (syntax-tree-node-children node))
       (begin
         (printf "{")
+
         (for-each (lambda (x) (display-tree-mma x) (printf ", "))
          (reverse (rest (reverse (syntax-tree-node-children node)))))
         (display-tree-mma (last (syntax-tree-node-children node)))
+
         (printf "}"))
-      (printf "\"~a\"" (syntax-item-id (syntax-tree-node-children node))))
+      (printf "\"~a\"" (token-content (matched-item-content (syntax-tree-node-children node)))))
   (printf "]"))
 
 (provide (all-defined-out))

@@ -82,7 +82,10 @@
 (define (lexical-generator s)
   (generator
    ()
-   (let rec ([result (lex-analyse s)])
+   (let rec ([result (for/list ([i (lex-analyse s)]
+                                #:when(match (token-type i)
+                                         [(== token-whitespace) #f]
+                                         [else #t])) i)])
      (if (empty? result)
          (void)
          (begin

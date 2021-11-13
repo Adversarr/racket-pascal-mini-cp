@@ -5,6 +5,7 @@
 (require "closure.rkt")
 (require "goto.rkt")
 (require "build.rkt")
+(require "../lex/lexer.rkt")
 (require racket/generator)
 (define STX-FAKE-S
   (syntax-item "S'" 0 (void)))
@@ -73,5 +74,28 @@
                       (yield (first x))
                       (loop (rest x)))))))
 
-(let ([retval ((build-lr1-automata prod aug STX-EOF) g)])
+
+
+(define file-to-analysis
+  (command-line
+   #:program "Lexical Analyser"
+   #:args (filename)
+   filename))
+
+
+(define content
+  (bytes->string/utf-8 (file->bytes file-to-analysis)))
+
+(printf "Content of ~a is:\n~a\n################## RESULT OF LEXER ##################\n\n" file-to-analysis content)
+
+(define gen (lexical-generator content))
+
+(define productions
+  (list
+   (production STX-FAKE-S (list STX-S))
+   (production STX-S (list stx-keyword-if STX-S stx-keyword-then STX-S))
+   (production STX-S (list stx-identifier))
+   (production STX-S (list stx-number))))
+
+(let ([retval ((build-lr1-automata productions aug STX-EOF) gen)])
   (display-tree-mma retval))

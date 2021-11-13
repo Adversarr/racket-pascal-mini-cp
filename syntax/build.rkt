@@ -116,12 +116,11 @@
            (hash-set!
             ht c
             (lambda (sym)
-              (let redo ([buf sym])
+              (let redo ([buffer sym])
                 (printf "Entering state(closure):\n")
                 (for-each (lambda (c) (display "\t- ") (display-lritem c)) c)
-                (if (or (syntax-item? buf) (pair? buf))
-                    (void)
-                    (set! buf (term->stx-item buf)))
+                (define buf (if (or (syntax-item? buffer)
+                                    (pair? buffer)) buffer (term->stx-item buffer)))
                 (printf "Received a symbol [[")
                 (if (pair? buf)
                     (printf "~a" (syntax-item-id (syntax-tree-node-head (car buf))))
@@ -135,9 +134,11 @@
                       (begin (display-tree nt-tree-node) (displayln ""))
                       (printf "Current state is\n")
                       (for-each (lambda (c) (display "\t- ") (display-lritem c)) c)
-                      (if (eq? (syntax-tree-node-head nt-tree-node) (first (LRItem-right-tail augmented-item)))
+                      (if (eq? (syntax-tree-node-head nt-tree-node)  (LRItem-left augmented-item))
                           (begin
                             (printf "All done!!!\n") ; Augmented item
+                            (display-tree nt-tree-node)
+                            (printf "\n\nExiting...\n\n")
                             nt-tree-node)
                           (let* ([next-state (hash-ref ht (goto c (syntax-tree-node-head nt-tree-node)))]
                                  [retval (next-state next-symbol-in-buf)])
@@ -193,16 +194,18 @@
                                     (display-lritem item)
                                     (cons (cons (cons (LRItem-left item) (reverse (LRItem-right-head item)))
                                                 (list))
-                                          buf))))
+                                          buffer))))
                           (if (empty? item-can-reduce)
                               ; shift in the terminal and go to another state.
                               ; 执行 移进 + 转下一状态
                               (begin
                                 (let* ([matched-stx buf]
                                        [next-state (hash-ref ht (goto c matched-stx))])
-                                  (printf "Shift in! \n\tMatched-stx is ~a \n" matched-stx)
+                                  (printf "Shift in! \n\tMatched<~a>-stx is ~a \n" buffer matched-stx)
                                   (let([retval (next-state (gen))])
-                                    (printf "Caught retval is ~a\n" retval)
+                                    (if (syntax-tree-node? retval)
+                                        (display-tree retval)
+                                        (void))
                                     (let ([prod-in-use (cdr (car (car retval)))]
                                           [prod-head (car (car (car retval)))]
                                           [stack (cdr (car retval))]
@@ -211,7 +214,7 @@
                                       (for-each (lambda (c) (display "\t\t- ") (display-lritem c)) c)
                                       (define stack-added (append
                                                            stack
-                                                           (list (syntax-tree-node (first prod-in-use) matched-stx))))
+                                                           (list (syntax-tree-node (first prod-in-use) (matched-item matched-stx buffer)))))
                                       (printf "\tcurrently in stack is\n\t[")
                                       (for-each
                                        (lambda (item)
