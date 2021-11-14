@@ -361,7 +361,7 @@
 
 (define stx-relop-multi
  (syntax-item
-  "keyword-multi" 0
+  "keyword-multi" 1
   (lambda (tok)
      (if (void? tok)
          #f
@@ -371,7 +371,7 @@
 
 (define stx-relop-divide
  (syntax-item
-  "keyword-divide" 0
+  "keyword-divide" 1
   (lambda (tok)
      (if (void? tok)
          #f

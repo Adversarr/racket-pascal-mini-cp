@@ -252,7 +252,7 @@
                                       (if (>= (length head) 2)
                                           (if (syntax-item? (second (reverse head)))
                                               (begin
-                                                (printf "But I found that I can decide by syntax ~a"
+                                                (printf "But I found that I can decide by syntax ~a\n"
                                                         (second(reverse head)))
                                                 (let ([prio-shift-in (syntax-item-priority (first (LRItem-right-tail (first item-can-shiftin))))]
                                                       [prio-reduce (syntax-item-priority (second(reverse head)))])
@@ -261,8 +261,8 @@
                                                           (reduce))))
                                               (void))
                                           (void)))
-                                      (void))
-                                (void)))))
+                                    (void))
+                                ))))
                     )))
             )))
        all-closures)
