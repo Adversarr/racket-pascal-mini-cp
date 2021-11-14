@@ -1,1 +1,1 @@
-if 1 then if 2 then 3
+1 + 2 * 3 + 4 * 5

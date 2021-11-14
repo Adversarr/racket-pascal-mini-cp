@@ -93,8 +93,8 @@
 (define productions
   (list
    (production STX-FAKE-S (list STX-S))
-   (production STX-S (list stx-keyword-if STX-S stx-keyword-then STX-S))
-   (production STX-S (list stx-identifier))
+   (production STX-S (list STX-S stx-relop-plus STX-S))
+   (production STX-S (list STX-S stx-relop-multi STX-S))
    (production STX-S (list stx-number))))
 
 (let ([retval ((build-lr1-automata productions aug STX-EOF) gen)])
