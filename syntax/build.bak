@@ -64,12 +64,9 @@
 
 (define (build-lr1-automata prod-list augmented-item eof-syntax)
   (define closure (get-closure-function prod-list))
-
   (define I0 (closure (list augmented-item)))
-  
   (define term->stx-item
     (let ([all-terminals (get-all-terminals prod-list)])
-      (for-each (lambda (t) (printf "Found:\t~a\n" t)) all-terminals)
       (lambda (tok)
         (let ([stxl (for/list
                         ([t all-terminals]
@@ -80,16 +77,13 @@
                   eof-syntax
                   (printf "ERROR: cannot identify this terminal.~a\n" tok))
               (first stxl))))))
-
   (define (generate-closure-from item-list)
     (for/list ([stx (stx-can-go item-list)])
       (closure (go item-list stx))))
-
   (define (find-not-in clist c)
     (for/list ([clos (generate-closure-from c)]
                #:when(not(costom-list-member? closure-eq? clist clos)))
       clos))
-
   (define all-closures (let ([q (make-queue)])
                          (enqueue! q I0)
                          (let expand-closure ([result (list)])
@@ -103,7 +97,6 @@
                                   (lambda (g) (enqueue! q g))
                                   (find-not-in result top))
                                  (expand-closure result))))))
-
   (define goto
     (let ([ht (make-hash)])
       (for-each (lambda (c) (hash-set! ht c (make-hash))) all-closures)
@@ -131,7 +124,7 @@
                 (printf "Received a symbol [[")
                 (if (pair? buf)
                     (printf "~a" (syntax-item-id (syntax-tree-node-head (car buf))))
-                    (printf "~a" (syntax-item-id buf)))
+                    (syntax-item-id buf))
                 (displayln "]]\n\tCurrent Closure is \n")
                 (for-each (lambda (c) (display "\t- ") (display-lritem c)) c)
                 (define (shift-in-helper retval matched-stx transformer)
@@ -141,7 +134,7 @@
                         [next-symbol-in-buffer (cdr retval)])
 
                     (printf "Reducing... I am: ~a\n" matched-stx)
-                    (for-each (lambda (c) (display "\t- ") (display-lritem c)) c)
+                    (for-each (lambda (c) (display "\t\t- ") (display-lritem c)) c)
 
                     (define stack-added (append
                                          stack

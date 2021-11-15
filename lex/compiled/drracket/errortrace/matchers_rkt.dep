@@ -1,0 +1,1 @@
+("8.2" ta6nt ("17fc006afe9ac065812900613ba66e7a78368007" . "d813593440dff88d0da548d0da48862124949cfd") #"D:\\2021-2022-1\\Compiler\\src\\racket-pascal-mini-cp\\lex\\basic-utils.rkt" (collects #"errortrace" #"errortrace-key.rkt") (collects #"racket" #"main.rkt") (collects #"racket" #"runtime-config.rkt"))

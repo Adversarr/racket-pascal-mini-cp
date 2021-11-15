@@ -1,8 +1,5 @@
 #lang racket
 
-(require rebellion/type/enum)
-
-(require rebellion/streaming/reducer)
 (require "../lex/token.rkt")
 
 
@@ -87,7 +84,7 @@
 (define (display-lritem item)
   (printf "Item(~a -> " (syntax-item-id (LRItem-left item)))
   (for-each (lambda (stx) (printf "~a " (syntax-item-id stx))) (LRItem-right-head item))
-  (printf "· ")
+  (printf "^ ")
   (for-each (lambda (stx) (printf "~a " (syntax-item-id stx))) (LRItem-right-tail item))
   (printf ", ~a)\n" (syntax-item-id (LRItem-look-ahead item))))
 
@@ -99,22 +96,42 @@
           (printf "-> {~a}[" (length (syntax-tree-node-children node)))
           (for-each rec (syntax-tree-node-children node))
           (printf "]"))
-        (printf "~a" (matched-item-content (syntax-tree-node-children node))))
+        (let ([content (matched-item-content (syntax-tree-node-children node))])
+        (printf "[[\"~a\"]]" (if (token? content)
+                             (token-content content)
+                             content))))
     (printf ")")))
 
 (define (display-tree-mma node)
-  (printf "Tree[~a," (syntax-item-id (syntax-tree-node-head node)))
   ; (display-tree node)
   (if (list? (syntax-tree-node-children node))
       (begin
+        (printf "Tree[\"~a\"," (syntax-item-id (syntax-tree-node-head node)))
         (printf "{")
 
         (for-each (lambda (x) (display-tree-mma x) (printf ", "))
          (reverse (rest (reverse (syntax-tree-node-children node)))))
         (display-tree-mma (last (syntax-tree-node-children node)))
+        (printf "}]"))
+      (let ([content (matched-item-content (syntax-tree-node-children node))])
+        (printf "\"[~a]~a\"" (syntax-item-id (syntax-tree-node-head node)) (if (token? content)
+                             (token-content content)
+                             content)))))
 
-        (printf "}"))
-      (printf "\"~a\"" (token-content (matched-item-content (syntax-tree-node-children node)))))
-  (printf "]"))
+; (define (display-tree-command-line-helper prefix node)
+;   (if (list? (syntax-tree-node-children node))
+;       (let* ([header (syntax-item-id (syntax-tree-node-head node))]
+;              [pfx-length (string-length header)]
+;              [new-pfx (string-append prefix (make-string pfx-length #\space) " + ")])
+;         (printf "~a~a\n" prefix (syntax-item-id (syntax-tree-node-head node)))
+;         (display-tree-command-line-helper (first (syntax-tree-node-children node)))
+;         (for-each
+;          (lambda (node) (display-tree-command-line-helper new-pfx node)
+;          (rest (syntax-tree-node-children node)))
+;         (printf "}]"))
+;       (let ([content (matched-item-content (syntax-tree-node-children node))])
+;         (printf "\"[~a]~a\"" (syntax-item-id (syntax-tree-node-head node)) (if (token? content)
+;                              (token-content content)
+;                              content)))))
 
 (provide (all-defined-out))
