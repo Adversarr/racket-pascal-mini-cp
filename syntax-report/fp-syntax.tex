@@ -194,10 +194,70 @@
 \end{description}
 
 \begin{remark}
-	对应于龙书中的算法主体，
+	对应于龙书中的LR(1)算法主体，也就是所谓的LR(1)分析的主控。
 \end{remark}
 
+\subsubsection{LR自动机}
 
+从实现上说，实际上这不是一个自动机，而是一个先柯里化后的递归函数！
+
+假设我们有一个词法单元（Token，记为$T$）组成的列表 $t_1, t_2, \cdots, t_n, \#$，LR(1)语法分析的输出应该是一颗语法树。简单说即为：
+
+$$
+f_1:T\times T\times\cdots \times T \rightarrow \{\mathrm{Syntax~Tree}\}
+$$
+
+使用柯里化后：
+
+$$
+\begin{aligned}
+	f_1:&t_1\mapto f_2\\
+	f_2:&t_2\mapto f_3\\
+	&\cdots\\
+	f_n:&t_n \mapto f_{n+1}\\
+	f_{n+1}:&\# \mapto \mathrm{Syntax~Tree}
+\end{aligned}
+$$
+
+可以看出，其输入都是相同的，而提供给函数的实际上是一个流对象（生成器），所以考虑最后将其转换为递归函数实现。在实验1中，已经说明了：状态机的实质就是从函数和输入到另一个函数的映射（状态转换函数）。因此，在语法分析实现过程中，将LR自动机实现为这样的函数。但实现中不难发现一个问题，由于我们在编码时无法确定状态总数，状态转换函数都定义为匿名函数。也就是说，这个递归函数跳转时跳转的对象是没有事先绑定的，显然，这是一个Y-组合子问题。
+
+当然，我们也可以做出一点改变，用一个很不函数式的方法来实现类似于一个Y-组合子的方法，我们将每一个状态及其对应的状态转换函数，写入一个哈希表中，在进行状态跳转的同时在哈希表里面查询相应的表项执行，来避免Y-组合子中无法进行匿名函数变量绑定的问题。
+
+\subsection{Function Template}
+\begin{quotation}
+	\textit{Translate the data definitions into an outline of the function.}
+\end{quotation}
+
+在此，我仅仅给出 \lstinline|build-lr1-automata| 的定义过程。
+
+\subsection{LR(1)自动机构造基础}
+
+给定产生式列表、增广文法的开始符号产生式，我们可以计算如下内容：
+
+\begin{enumerate}
+	\item $\mathrm{CLOSURE}$ 函数(Currying)
+	\item $I_0$ 即自动机的初始状态所对应的项集闭包
+	\item $\mathrm{GOTO}$ 函数
+\end{enumerate}
+
+\begin{remark}
+	在这里的 $\mathrm{GOTO}$ 函数和先前定义的 $\mathrm{GO}$ 函数是不同的，GO函数仅仅计算出从闭包 $I_1$ 通过输入文法符号 $A$ 得到的下一个闭包 $I_2$，但在这里，$I_2$ 是通过$I_1$推导的，虽然本质上重复两次计算 $\mathrm{GO}(I_1, A)$ 所得到的 $I_2$ 是相同的（函数是单值映射），但在计算机内部，由于通过了两次推导，用面向对象的说法即是两个截然不同的对象。
+\end{remark}
+
+注意，上面实现的 $\mathrm{GOTO}$ 函数是可以接受终结符号的！在报告实现的语法分析器中，由于将自动机的状态和LR(1)项目集构建了一一对应关系，即自动机运行时能确定自身状态对应的LR(1)项目集，可以通过该项目集和输入的符号和$\mathrm{GOTO}$函数来确定执行移进或者规约。换言之，，不需要用 $\mathrm{ACTION}$ 函数即可实现该自动机。实现如下：考虑原有的移进和规约的执行逻辑，
+	
+在LR(1)分析表中填入移进，当下面两项中有且仅有一项成立：
+
+\begin{enumerate}
+	\item $\mathrm{GO}(I_1, a) = I_2$ 且 $a$ 是终结符号，那么在 $\mathrm{ACTION}$ 中填入移进并且转状态 $I_2$（项目集对应的状态）
+	\item $\mathrm{GO}(I_1, A) = I_2$ 且 $A$ 是非终结符号，那么在 $\mathrm{GOTO}$ 中填入状态 $I_2$
+\end{enumerate}
+
+重点关注非终结符号情况：在LR自动机执行的过程中，\textit{必定是在规约得到了一个非终结符号后执行}$\mathrm{GOTO}$\textbf{操作}。对于这类情况我们可以简单的执行如下三个内容：把\textit{读头}下的内容转换为该非终结符号，并重新执行移进所对应的逻辑即可。
+
+\begin{remark}
+	这样的设计是合理的，对于一般的读头下的token，我们在产生时先存入
+\end{remark}
 
 
 \end{document}
