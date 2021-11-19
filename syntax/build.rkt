@@ -35,31 +35,6 @@
           #t
           (costom-list-member? eqf (rest lst) item))))
 
-(define (build-lr1-closure-set prod-list augmented)
-  (define closure (get-closure-function prod-list))
-  (define initial-item-list (closure (list augmented)))
-
-  (define (generate-closure-from item-list)
-    (for/list ([stx (stx-can-go item-list)])
-      (closure (go item-list stx))))
-  (define (find-not-in clist c)
-    (for/list ([clos (generate-closure-from c)]
-               #:when(not(costom-list-member? closure-eq? clist clos)))
-      clos))
-  (let ([q (make-queue)])
-    (enqueue! q initial-item-list)
-    (let expand-closure ([result (list)])
-      (if (queue-empty? q)
-          result
-          (let* ([top (dequeue! q)])
-            (printf "ITERATING NEXT...\n")
-            (for-each display-lritem top)
-            (set! result (append result (list top)))
-            (for-each
-             (lambda (g) (enqueue! q g))
-             (find-not-in result top))
-            (expand-closure result))))))
-
 (define (build-lr1-automata prod-list augmented-item eof-syntax)
   (define closure (get-closure-function prod-list))
 
@@ -266,5 +241,4 @@
       ((hash-ref ht I0) sym)))
   work-on-generator)
 
-(provide build-lr1-closure-set)
 (provide build-lr1-automata)
