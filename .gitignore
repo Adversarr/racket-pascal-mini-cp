@@ -4,8 +4,12 @@
 *.aux
 *.fdb_*
 *.out
-
+*.bak
+*.exe
+compiled
 *.synctex.gz
 *.toc
 *.log
 *.fls
+result*.txt
+result.txt

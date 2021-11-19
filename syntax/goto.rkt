@@ -20,7 +20,7 @@
 
 
 
-(define (closure-eq? a b)
+(define (closure-eq2? a b)
   (all-true?
    (for/list ([ia a])
      (any-true?
@@ -28,9 +28,20 @@
         (LRItem-equal? ia ib)))
      )))
 
-; (define (build-all-closures cl cf goto)
-;   (define (rec closures)
-;     (let ([addons (list)])
-;       )))
+(define (closure-eq? a b)
+  (if (empty? a)
+      (if (empty? b)
+          #t    ; a 和 b 都为空
+          #f)   ; a 空 b 不空
+      (let rec ([ca a])
+        (cond
+          [(empty? ca) #t]
+          [else
+           (if (any-true?
+                (for/list ([ib b])
+                  (LRItem-equal? (first ca) ib)))
+               (rec (rest ca))
+               #f)]))))
+
 
 (provide (all-defined-out))

@@ -1,0 +1,184 @@
+\documentclass[lang=cn]{ctexart}
+\usepackage{hyperref}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{geometry}
+\usepackage{color}
+
+\usepackage{amsmath}
+
+\newtheorem{remark}{注}
+
+\geometry{
+    a4paper,
+    left=2cm,right=2cm,
+    top=2.5cm,bottom=2.5cm
+}
+
+\lstset{
+	language=lisp,
+	basicstyle=\tt,
+	numbers=left, numberstyle=\tiny,
+	xleftmargin=5em,
+	xrightmargin=5em
+}
+
+\title{
+    LR(1) 语法分析
+    \begin{flushright}\normalsize
+        \textit{-- Based on Racket (A Dialect of Lisp)}
+    \end{flushright}
+}
+
+\author{61519322 杨哲睿}
+
+\begin{document}
+\maketitle
+
+\tableofcontents
+\newpage
+
+\section{实验要求}
+
+\begin{enumerate}
+    \item 手工画出LR(1)项目集族及状态图
+    \item 构造LR(1)分析表
+    \item 在上述过程中，对二义文法进行必要的处理
+    \subitem 表达优先级和结合律
+    \subitem 按照优先级和结合律对预测符及状态转换关系进行必要的取舍
+    \item 按照LR(1)分析表写出语法分析程序
+\end{enumerate}
+
+当然，这只是一个最简单的要求。但考虑到LR(1)分析器的手工构造难度，该实验使用{\heiti 程序推导}的方式来构造LR(1)项目集族和状态转换图。并且在实验的具体实现上有所变化。
+
+\section{设计思路}
+
+根据 \hyperref{https://htdp.org/2021-11-15/Book/part_preface.html#%28part._sec~3asystematic-design%29}{website}{}{htdp} 中的详细介绍，我们可以将设计一个程序分为以下六个步骤：
+
+\begin{enumerate}
+    \item From Problem to Data Definitions
+    \item Signature, Purpose Statement, Header
+    \item Functional Examples
+    \item Function Template
+    \item Function Definitions
+    \item Testing
+\end{enumerate}
+
+报告也将从这六个方面展开，对于该语法分析程序的制作进行分析。
+
+\subsection{From Problem to Data Definitions}
+
+\begin{quotation}\textit{
+    Identify the information that must be represented and how it is represented in the chosen programming language. Formulate data definitions and illustrate them with examples.}
+\end{quotation}
+
+总的来说，我们LR分析程序：
+\begin{itemize}
+	\item 输入为：Token 的流 (具体实现为\textit{生成器generator})
+	\item 输出为：对应的一颗语法树
+\end{itemize}
+
+一个LR(1)语法分析程序所涉及的数据结构如下：
+
+\begin{enumerate}
+    \item \lstinline|syntax-item| 文法符号 -- 指上下文无关文法中的\textit{非终结符}或\textit{终结符}单元，拥有名称 \lstinline|id|，优先级 \lstinline|proority|、匹配器(函数)\lstinline|matcher|
+    \item \lstinline|matched-item| 匹配的文法符号 -- 指输出时匹配后的\textit{终结符}单元
+    \item \lstinline|production| 产生式 -- 上下文无关文法的\textit{一个}产生式，分为左部和右部两部分
+    \item \lstinline|syntax-tree-node| 语法树的一个节点
+    \item \lstinline|LRItem| LR(1) 项 -- 分为四个部分：\textit{产生式的左部、产生式右部在$\cdot$之前的部分、产生式右部在$\cdot$之后的部分、展望(Look-Ahead)符号}
+\end{enumerate}
+
+对该数据结构的定义如下：
+
+\begin{lstlisting}[caption={types.rkt}]
+(struct syntax-item
+ (id priority matcher) #:transparent)
+(struct matched-item
+ (stx content))
+(struct production
+ (left right) #:transparent)
+(struct syntax-tree-node
+ (head children) #:transparent)
+\end{lstlisting}
+
+当然这些只是基础的定义，为了完成LR(1)程序，我们还需要定义：
+
+\begin{enumerate}
+	\item 一个 LR(1) 项目集就是一个 \lstinline|LRItem| 的\textit{列表}
+	\item 一个上下文无关文法包含：\textit{终结符号}、\textit{非终结符号}、\textit{开始符号}、\textit{产生式}
+	\item 对于一个增广的上下文无关文法，还需要一个\textit{增广文法的新开始符号}及其对应的\textit{开始符号产生式}
+\end{enumerate}
+
+\subsection{Signature, Purpose Statement, Header and Functional Examples}
+
+\begin{quotation}
+	\textit{State what kind of data the desired function consumes and produces. Formulate a concise answer to the question what the function computes. Define a stub that lives up to the signature.}
+\end{quotation}
+
+根据这些类型的定义，我们足以定义出整个LR(1)语法分析程序的所有函数，如下：
+
+\paragraph{closure}
+\begin{description}
+	\item[输入] LR(1) 项目集 $I$
+	\item[输出] 项目集的闭包 $\mathrm{CLOSURE}(I)$
+\end{description}
+
+\begin{remark}
+	使用柯里化，这里不需要输入产生式表。
+\end{remark}
+
+\paragraph{get-closure-function}
+\begin{description}
+	\item[输入] 产生式的列表
+	\item[输出] $\mathrm{CLOSURE}$ 函数
+\end{description}
+
+\begin{remark}
+	同理下面几个函数也使用柯里化，降低复杂度。
+\end{remark}
+
+\paragraph{get-look-ahead}
+\begin{description}
+	\item[输入] 产生式列表
+	\item[输出] $look-ahead$函数
+\end{description}
+
+\paragraph{look-ahead}
+\begin{description}
+	\item[输入] LRItem
+	\item[输出] 当前LRItem在获取到下一个非终结符后的部分的First集
+\end{description}
+\begin{remark}
+	若有 $\mathrm{LRItem}= [A\rightarrow \alpha \cdot B \beta, a]$ 则$look-ahead(\mathrm{LRItem}) = \textsc{FIRST}(\beta)$。这里不需要原来的look-ahead是因为在后续计算中加入了look-ahead的考量。
+\end{remark}
+
+\paragraph{go}
+\begin{description}
+	\item[输入] LR(1)项目集闭包、syntax-item
+	\item[输出] 闭包在获取到该syntax-item后产生的新项目集(非闭包)
+\end{description}
+
+\paragraph{look-ahead-and-reduce}
+\begin{description}
+	\item[输入] LR(1)项目集闭包、(读头下的非终结符对应的)syntax-item
+	\item[输出] 闭包中可以执行规约的项目列表
+\end{description}
+
+\begin{remark}
+	这是我实现的方法和书上方法主要的不同：在龙书中，LR自动机的一个项目实则对应了一个项目集（闭包），所以我们无需对于状态进行编号，而只需要通过闭包的转换即可实现等价的自动机行为。这里输出的的可规约的项即为在预测分析表中填上的 $r$，而使用的产生式可以直接通过该规约项所对应的产生式计算得到。
+\end{remark}
+
+\begin{remark}
+	实际上，我们不需要返回一个列表，因为LR(1)不产生规约-规约冲突。
+\end{remark}
+
+\paragraph{try-to-shift-in}
+\begin{description}
+	\item[输入] LR(1)项目集闭包、(读头下的非终结符对应的)syntax-item
+	\item[输出] 闭包中可以执行移进的项目
+\end{description}
+
+
+
+
+\end{document}

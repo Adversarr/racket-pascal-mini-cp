@@ -1,11 +1,9 @@
 #lang racket
 
 (require "types.rkt")
-(require "syntax-define.rkt")
 (require "closure.rkt")
 (require "goto.rkt")
 (require data/queue)
-(require racket/generator)
 
 (define (look-ahead-and-reduce lritem-list sym)
   (for/list ([lri lritem-list]

@@ -311,7 +311,7 @@
 
 (define stx-relop-assign
  (syntax-item
-  "keyword-assign" 0
+  "keyword-assign" 5
   (lambda (tok)
      (if (void? tok)
          #f
@@ -387,6 +387,16 @@
          #f
     (and (eq? (token-type tok) token-sep)
         (eq? (token-attribute tok) "square-lbracket"))))))
+    
+
+(define stx-sep-colon
+ (syntax-item
+  "keyword-colon" 0
+  (lambda (tok)
+     (if (void? tok)
+         #f
+    (and (eq? (token-type tok) token-relop)
+        (eq? (token-attribute tok) "colon"))))))
     
 
 (define stx-sep-square-rbracket

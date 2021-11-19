@@ -3,10 +3,17 @@
 (require "types.rkt")
 (require "syntax-define.rkt")
 
+; (define (in-lritem-list? st a)
+;   (any-true?
+;    (for/list ([lri st])
+;      (LRItem-equal? lri a))))
+
+
 (define (in-lritem-list? st a)
-  (any-true?
-   (for/list ([lri st])
-     (LRItem-equal? lri a))))
+  (cond
+    [(empty? st) #f]
+    [(LRItem-equal? (first st) a) #t]
+    [else (in-lritem-list? (rest st) a)]))
 
 (define (list-member? st a eqf) (any-true? (for/list ([i st]) (eqf i st))))
 (define (uniquify l eqf)

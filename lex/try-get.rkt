@@ -43,6 +43,7 @@
 
 (define (try-relop s)
   (cond
+    [(string=? s ":") "colon"]
     [(string=? s "<=") "leq"]
     [(string=? s ">=") "geq"]
     [(string=? s "<") "lt"]

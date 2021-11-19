@@ -118,20 +118,4 @@
                              (token-content content)
                              content)))))
 
-; (define (display-tree-command-line-helper prefix node)
-;   (if (list? (syntax-tree-node-children node))
-;       (let* ([header (syntax-item-id (syntax-tree-node-head node))]
-;              [pfx-length (string-length header)]
-;              [new-pfx (string-append prefix (make-string pfx-length #\space) " + ")])
-;         (printf "~a~a\n" prefix (syntax-item-id (syntax-tree-node-head node)))
-;         (display-tree-command-line-helper (first (syntax-tree-node-children node)))
-;         (for-each
-;          (lambda (node) (display-tree-command-line-helper new-pfx node)
-;          (rest (syntax-tree-node-children node)))
-;         (printf "}]"))
-;       (let ([content (matched-item-content (syntax-tree-node-children node))])
-;         (printf "\"[~a]~a\"" (syntax-item-id (syntax-tree-node-head node)) (if (token? content)
-;                              (token-content content)
-;                              content)))))
-
 (provide (all-defined-out))
