@@ -44,15 +44,15 @@
     (let ([all-terminals (get-all-terminals prod-list)])
       (for-each (lambda (t) (printf "Found:\t~a\n" t)) all-terminals)
       (lambda (tok)
-        (let ([stxl (for/list
-                        ([t all-terminals]
-                         #:when((syntax-item-matcher t) tok))
-                      t)])
-          (if (empty? stxl)
-              (if ((syntax-item-matcher eof-syntax) tok)
-                  eof-syntax
-                  (printf "ERROR: cannot identify this terminal.~a\n" tok))
-              (first stxl))))))
+        (if ((syntax-item-matcher eof-syntax) tok)
+            eof-syntax
+            (let ([stxl (for/list
+                         ([t all-terminals]
+                          #:when((syntax-item-matcher t) tok))
+                         t)])
+              (if (empty? stxl)
+                  (printf "ERROR: cannot identify this terminal.~a\n" tok)
+                  (first stxl)))))))
 
   (define (generate-closure-from item-list)
     (for/list ([stx (stx-can-go item-list)])
@@ -70,7 +70,9 @@
                                result
                                (let* ([top (dequeue! q)])
                                  (printf "ITERATING NEXT...\n")
-                                 (for-each display-lritem top)
+                                 (for-each (lambda (i)
+                                             (printf "\t")
+                                             (display-lritem i)) top)
                                  (set! result (append result (list top)))
                                  (for-each
                                   (lambda (g) (enqueue! q g))
@@ -113,7 +115,7 @@
                         [stack (cdr (car retval))]
                         [next-symbol-in-buffer (cdr retval)])
 
-                    (printf "Reducing... I am: ~a\n" matched-stx)
+                    (printf "Reducing... \n")
                     (for-each (lambda (c) (display "\t- ") (display-lritem c)) c)
 
                     (define stack-added (append
@@ -162,10 +164,7 @@
                             nt-tree-node)
                           (let* ([next-state (hash-ref ht (goto c (syntax-tree-node-head nt-tree-node)))]
                                  [retval (next-state next-symbol-in-buf)])
-                            (shift-in-helper retval nt-tree-node (lambda (m p) m))
-                            )
-                          )
-                      )
+                            (shift-in-helper retval nt-tree-node (lambda (m p) m)))))
                     (let ([item-can-reduce (look-ahead-and-reduce c buf)]
                           [item-can-shiftin (try-to-shift-in c buf)])
                       ; 接收到一个终结符号，执行移进或者规约
@@ -184,10 +183,7 @@
                                  (LRItem-left item)
                                  (reverse (LRItem-right-head item)))
                                 (list))
-                               buffer)
-                              )
-                            )
-                        )
+                               buffer))))
                       (define (shift-in)
                         (let* ([matched-stx buf]
                                [next-state (hash-ref ht (goto c matched-stx))])
@@ -202,8 +198,7 @@
                              (lambda (matched-stx prod-in-use)
                                (syntax-tree-node
                                 (first prod-in-use)
-                                (matched-item matched-stx buffer))))
-                            )))
+                                (matched-item matched-stx buffer)))))))
                       (if (empty? item-can-shiftin)
                           (if (empty? item-can-reduce)
                               (begin
@@ -231,12 +226,9 @@
                                                   (if (> prio-shift-in prio-reduce)
                                                       (shift-in)
                                                       (reduce))))
-                                              (void))
-                                          (void)))
-                                    (void))
-                                ))))
-                    )))
-            )))
+                                              (void)) ; error
+                                          (void)))    ; error
+                                    (void)))))))))))) ; error
        all-closures)
       ((hash-ref ht I0) sym)))
   work-on-generator)

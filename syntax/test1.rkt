@@ -89,13 +89,11 @@
    (production STX-EXPR (list stx-sep-lbracket STX-EXPR stx-sep-rbracket))
    (production STX-EXPR (list STX-EXPR stx-relop-plus STX-EXPR))
    (production STX-EXPR (list STX-EXPR stx-relop-minus STX-EXPR))
-   (production STX-EXPR (list STX-FCALL))
    (production STX-EXPR (list STX-EXPR stx-relop-divide STX-EXPR))
    (production STX-EXPR (list STX-EXPR stx-relop-assign STX-EXPR))
    (production STX-EXPR (list STX-EXPR stx-relop-multi STX-EXPR))
    (production STX-EXPR (list stx-number))
-   (production STX-EXPR (list stx-identifier))
-   ))
+   (production STX-EXPR (list stx-identifier))))
 
 (define aug
   (LRItem

@@ -5,7 +5,7 @@
 (require "build.rkt")
 (require "../lex/lexer.rkt")
 
-
+; Lexical Analysis
 (define file-to-analysis
   (command-line
    #:program "Lexical Analyser"
@@ -20,8 +20,7 @@
 (define gen (lexical-generator content))
 
 
-
-
+; Non-terminate symbols
 (define STX-FAKE-S
   (syntax-item "<augmented>" 0 (void)))
 
